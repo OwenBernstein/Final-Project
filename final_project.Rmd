@@ -1,0 +1,19 @@
+---
+title: "Final Project"
+author: "Owen Bernstein"
+date: "2/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(janitor)
+library(readxl)
+library(tidyverse)
+```
+
+```{r}
+evictions <- read_csv("raw-data/Evictions.csv")
+demographics <- read_csv("raw-data/Demographic_Statistics_By_Zip_Code.csv")
+```
+
