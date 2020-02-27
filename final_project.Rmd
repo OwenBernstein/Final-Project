@@ -12,8 +12,31 @@ library(readxl)
 library(tidyverse)
 ```
 
-```{r}
-evictions <- read_csv("raw-data/Evictions.csv")
-demographics <- read_csv("raw-data/Demographic_Statistics_By_Zip_Code.csv")
+```{r data cleaning, include = FALSE}
+evictions <- read_csv("raw-data/Evictions.csv") %>% 
+  clean_names() %>% 
+  select(eviction_address, executed_date, borough, eviction_zip) %>% 
+  filter(str_ends(executed_date, "19"))
+
+demographics <- read_csv("raw-data/Demographics_by_Zip_Code.csv") %>% 
+  clean_names() %>% 
+  select(-program_type)
+
+data_311 <- read_csv("raw-data/311_Service_Requests_from_2010_to_Present (2).csv") %>% 
+  clean_names() %>% 
+  select(created_date, closed_date, complaint_type, incident_zip, borough, latitude, longitude) %>% 
+ filter(str_detect(created_date, "2019"))
+
+joined_data <- evictions %>% 
+  inner_join(data_311, by = c("eviction_zip" = "incident_zip"), suffix = c("_eviction", "_incident")) %>% 
+  inner_join(demographics, by = c("eviction_zip" = "zip_code"))
 ```
+
+```{r}
+evictions_by_zip_code <- evictions %>% 
+  count(borough)
+```
+
+
+
 
