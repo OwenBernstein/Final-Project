@@ -33,8 +33,19 @@ joined_data <- evictions %>%
 ```
 
 ```{r}
+
 evictions_by_zip_code <- evictions %>% 
-  count(borough)
+  count(eviction_zip, sort = TRUE)
+
+homelessness_by_zip_code <- data_311 %>% 
+  count(incident_zip, sort = TRUE)
+
+
+zip_code_info <- evictions_by_zip_code %>% 
+  inner_join(homelessness_by_zip_code, by = c("eviction_zip" = "incident_zip"), suffix = c("_eviction", "_homelessness"))
+
+ggplot(zip_code_info, aes(n_homelessness, n_eviction)) + geom_point(jitter = TRUE)
+
 ```
 
 
