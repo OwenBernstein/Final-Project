@@ -25,14 +25,15 @@ demographics <- read_csv("raw-data/Demographics_by_Zip_Code.csv") %>%
 data_311 <- read_csv("raw-data/311_Service_Requests_from_2010_to_Present (2).csv") %>% 
   clean_names() %>% 
   select(created_date, closed_date, complaint_type, incident_zip, borough, latitude, longitude) %>% 
- filter(str_detect(created_date, "2019"))
+ filter(str_detect(created_date, "2019") & complaint_type == "Homeless Person Assistance")
 
 joined_data <- evictions %>% 
   inner_join(data_311, by = c("eviction_zip" = "incident_zip"), suffix = c("_eviction", "_incident")) %>% 
   inner_join(demographics, by = c("eviction_zip" = "zip_code"))
 ```
 
-```{r}
+```{r playing with data 1, include = FALSE}
+
 
 evictions_by_zip_code <- evictions %>% 
   count(eviction_zip, sort = TRUE)
@@ -41,12 +42,41 @@ homelessness_by_zip_code <- data_311 %>%
   count(incident_zip, sort = TRUE)
 
 
-zip_code_info <- evictions_by_zip_code %>% 
-  inner_join(homelessness_by_zip_code, by = c("eviction_zip" = "incident_zip"), suffix = c("_eviction", "_homelessness"))
+zip_code_info <- homelessness_by_zip_code %>% 
+  inner_join(evictions_by_zip_code, by = c("incident_zip" = "eviction_zip"), suffix = c("_homelessness", "_eviction"))
 
-ggplot(zip_code_info, aes(n_homelessness, n_eviction)) + geom_point(jitter = TRUE)
+ggplot(zip_code_info, aes(n_homelessness, n_eviction)) + geom_point() + geom_smooth()
 
 ```
+
+```{r playing with data 2, include = FALSE}
+
+evictions_by_zip_code <- evictions %>% 
+  count(eviction_zip, sort = TRUE)
+
+evictions_by_ethnicity <- function (ethnicity, head = 50) {
+  
+demographics %>% 
+  arrange(desc(ethnicity)) %>% 
+  head(head) %>% 
+  inner_join(evictions_by_zip_code, by = c("zip_code" = "eviction_zip")) %>%
+  ggplot(aes(ethnicity, n)) + 
+  geom_point() + 
+  geom_smooth()
+}
+
+demographics
+evictions_by_ethnicity(white_or_caucasian_percentage)
+```
+
+```{r function}
+
+evictions_by_ethnicity(hispanic_or_latino_a_percentage)
+
+```
+
+
+
 
 
 
